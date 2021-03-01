@@ -118,8 +118,8 @@ include: "rules/04a_star.smk"
 include: "rules/04b_rseqc.smk"
 include: "rules/04c_qualimap.smk"
 include: "rules/05a_rsem.smk"
-# include: "rules/05b_htseq.smk"
-# include: "rules/06a_salmon.smk"
-# include: "rules/06b_kallisto.smk"
+include: "rules/05b_htseq.smk"
+include: "rules/06a_salmon.smk"
+include: "rules/06b_kallisto.smk"
 
 
