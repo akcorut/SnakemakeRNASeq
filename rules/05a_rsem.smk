@@ -9,7 +9,6 @@ rule rsem_genome:
         ref_name = lambda wildcards, output: output[0][:-11]
     conda:
         "../envs/rsem.yaml"
-    priority:3
     shell:
         """
         rsem-prepare-reference \
@@ -21,14 +20,14 @@ rule rsem_calculate:
     input:
         bam= rules.star_pass2.output.tcp_bam
     output:
-        genes = "results/05_quantification/05a_rsem/genes/{smp}.genes.results",
+        genes = "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/05_quantification/05a_rsem/genes/{smp}.genes.results",
+        stat = directory("/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/05_quantification/05a_rsem/genes/{smp}.stat")
     params:
         genomedir= config["rsem"]["rsemindex"],
         prefix = lambda wildcards, output: output[0][:-14]
     threads: 24
     conda:
         "../envs/rsem.yaml"
-    priority:2
     shell:
         """
         rsem-calculate-expression \
@@ -40,11 +39,10 @@ rule rsem_calculate:
 
 rule multiqc_rsem:
     input:
-       expand("results/05_quantification/05a_rsem/genes/{smp}.stat", smp=sample_id)
+       expand(rules.rsem_calculate.output.stat, smp=sample_id)
     output:
-        "results/05_quantification/05a_rsem/rsem_multiqc.html"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/05_quantification/05a_rsem/rsem_multiqc.html"
     log:
-        "results/05_quantification/05a_rsem/logs/multiqc.log"
-    priority:1
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/05_quantification/05a_rsem/logs/multiqc.log"
     wrapper:
         "0.49.0/bio/multiqc"

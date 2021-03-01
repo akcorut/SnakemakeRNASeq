@@ -2,13 +2,11 @@ rule sort_bam:
     input:
         bam= rules.star_pass2.output.sorted_bam
     output:
-        temp("results/04_alignment/04b_alignment_qc/qualimap/SortedBam/{smp}_sorted.bam")
+        temp("/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/04_alignment/04b_alignment_qc/qualimap/SortedBam/{smp}_sorted.bam")
     params:
         prfx=lambda wildcards, output: output[0][:-4]
-    priority:50
     conda:
         "../envs/samtools.yaml"
-    priority:50
     threads:20
     shell:
         '''
@@ -19,7 +17,7 @@ rule qualimap:
     input: 
         sorted_bam= rules.sort_bam.output
     output: 
-        "results/04_alignment/04b_alignment_qc/qualimap/{smp}/qualimapReport.html"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/04_alignment/04b_alignment_qc/qualimap/{smp}/qualimapReport.html"
     params:
         outdir=lambda wildcards, output: output[0][:-20],
         gtf= rules.gff3_to_gtf.output.gtf
@@ -32,13 +30,10 @@ rule qualimap:
 
 rule multiqc_qualimap:
     input:
-        expand("results/04_alignment/04b_alignment_qc/qualimap{smp}/qualimapReport.html", smp=sample_id)
+        expand(rules.qualimap.output, smp=sample_id)
     output:
-        "results/04_alignment/04b_alignment_qc/qualimap/qualimap_multiqc.html"
-    priority:-1
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/04_alignment/04b_alignment_qc/qualimap/qualimap_multiqc.html"
     log:
-        "results/04_alignment/04b_alignment_qc/qualimap/logs/multiqc.log"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/04_alignment/04b_alignment_qc/qualimap/logs/multiqc.log"
     wrapper:
         "0.49.0/bio/multiqc"
-
-ruleorder: sort_bam > qualimap > multiqc_qualimap

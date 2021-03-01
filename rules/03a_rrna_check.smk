@@ -1,14 +1,13 @@
 rule bwa_mem:
     input:
-        r1="results/02_trim/{smp}_R1_val_1.fq.gz",
-        r2="results/02_trim/{smp}_R2_val_2.fq.gz",
+        r1=rules.trim_galore_pe.output.trim1,
+        r2=rules.trim_galore_pe.output.trim2,
         rrna=config["rRNA"]
     output:
-        temp("results/03_decontamination/03a_rrna_check/{smp}_rrna.sam")
+        temp("/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03a_rrna_check/{smp}_rrna.sam")
     threads:16
     conda:
         "../envs/bwa.yaml"
-    priority:5
     shell:
         '''
         bwa mem -t {threads} {input.rrna} {input.r1} {input.r2} > {output}
@@ -16,13 +15,12 @@ rule bwa_mem:
 
 rule sam_to_bam:
     input:
-        sam="results/03_decontamination/03a_rrna_check/{smp}_rrna.sam"
+        sam=rules.bwa_mem.output
     output:
-        temp("results/03_decontamination/03a_rrna_check/bam/{smp}_rrna.bam")
+        temp("/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03a_rrna_check/bam/{smp}_rrna.bam")
     threads:16
     conda:
         "../envs/samtools.yaml"
-    priority:4
     shell:
         '''
         samtools view -@ {threads} -bS -o {output} {input.sam}
@@ -30,41 +28,38 @@ rule sam_to_bam:
 
 rule flagstat:
     input:
-        bam="results/03_decontamination/03a_rrna_check/bam/{smp}_rrna.bam"
+        bam=rules.sam_to_bam.output
     output:
-        "results/03_decontamination/03a_rrna_check/flagstat/{smp}_rrna.out"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03a_rrna_check/flagstat/{smp}_rrna.out"
     threads:16
     conda:
         "../envs/samtools.yaml"
-    priority:3
     shell:
         '''
-        samtools flagstat -@ {threads} {input.bam} > {output}
+        samtools flagstat {input.bam} --threads {threads} > {output}
         '''
 
 rule stats:
     input:
-        bam="results/03_decontamination/03a_rrna_check/bam/{smp}_rrna.bam"
+        bam=rules.sam_to_bam.output
     output:
-        "results/03_decontamination/03a_rrna_check/stats/{smp}_rrna_stats.out"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03a_rrna_check/stats/{smp}_rrna_stats.out"
     threads:16
-    priority:2
     conda:
         "../envs/samtools.yaml"
     shell:
         '''
-        samtools stats -@ {threads} {input.bam} > {output}
+        samtools stats {input.bam} > {output}
         '''
 
 rule multiqc_rrna:
     input:
-        expand("results/03_decontamination/03a_rrna_check/flagstat/{smp}_rrna.out", smp=sample_id),
-        expand("results/03_decontamination/03a_rrna_check/bam/{smp}_rrna.bam", smp=sample_id),
-        expand("results/03_decontamination/03a_rrna_check/stats/{smp}_rrna_stats.out", smp=sample_id)
+        expand(rules.flagstat.output, smp=sample_id),
+        expand(rules.sam_to_bam.output, smp=sample_id),
+        expand(rules.stats.output, smp=sample_id)
     output:
-        "results/03_decontamination/03a_rrna_check/rrna_multiqc_report.html"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03a_rrna_check/rrna_multiqc_report.html"
     log:
-        "results/03_decontamination/03a_rrna_check/logs/multiqc.log"
-    priority:1
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03a_rrna_check/logs/multiqc.log"
     wrapper:
         "0.48.0/bio/multiqc"

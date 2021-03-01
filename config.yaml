@@ -1,8 +1,8 @@
 samples:
   # Sample sheets
   all: samples.tsv
-  meristem: meristem.tsv
-  leaf: leaf.tsv
+  # meristem: meristem.tsv
+  # leaf: leaf.tsv
   # Raw data path
   path: "/work/jawlab/kivanc/PeanutRnaSeq/data/fastq"
 
@@ -44,26 +44,26 @@ featurecounts:
 rsem:
   # activate RSEM: false or true
   activate: true
-  rsemindex: results/05_quantification/05a_rsem/rsem_index/tifrunner
-  genes: "results/05_quantification/05a_rsem/genes"
+  rsemindex: /scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/05_quantification/05a_rsem/rsem_index/tifrunner
+  genes: "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/05_quantification/05a_rsem/genes"
 
 htseq:
   # activate HTSeq: false or true
-  activate: true
+  activate: false
 
 alignment_free:
   # activate alignment-free mode: false or true
-  activate: true
+  activate: false
 
 kallisto:
   # activate kallisto: false or true
-  activate: true
+  activate: false
 
 salmon:
   # activate salmon: false or true
-  activate: true
+  activate: no
   # activate salmon mapping_mode: false or true
-  mapping_mode: true
+  mapping_mode: no
   # activate salmon alignment_mode: false or true
   alignment_mode: false
 

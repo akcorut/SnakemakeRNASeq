@@ -2,15 +2,14 @@ rule trim_galore_pe:
     input:
         GetFastq
     output:
-        trim1="results/02_trim/{smp}_R1_val_1.fq.gz",
-        report1="results/02_trim/{smp}_R1.fastq.gz_trimming_report.txt",
-        trim2="results/02_trim/{smp}_R2_val_2.fq.gz",
-        report2="results/02_trim/{smp}_R2.fastq.gz_trimming_report.txt"
+        trim1="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/02_trim/{smp}_R1_val_1.fq.gz",
+        report1="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/02_trim/{smp}_R1.fastq.gz_trimming_report.txt",
+        trim2="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/02_trim/{smp}_R2_val_2.fq.gz",
+        report2="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/02_trim/{smp}_R2.fastq.gz_trimming_report.txt"
     params:
         extra="--illumina -q 20"
     log:
-        "results/02_trim/logs/{smp}.log"
-    priority:4
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/02_trim/logs/{smp}.log"
     wrapper:
         "0.35.2/bio/trim_galore/pe"
 
@@ -19,39 +18,38 @@ rule fastqc_trim:
         r1=rules.trim_galore_pe.output.trim1,
         r2=rules.trim_galore_pe.output.trim2
     output:
-        html1="results/01_qc/01a_fqc/fqc_trim/{smp}_R1_val_1_fastqc.html",
-        zip1="results/01_qc/01a_fqc/fqc_trim/{smp}_R1_val_1_fastqc.zip",
-        html2="results/01_qc/01a_fqc/fqc_trim/{smp}_R2_val_2_fastqc.html",
-        zip2="results/01_qc/01a_fqc/fqc_trim/{smp}_R2_val_2_fastqc.zip"
+        html1="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/01_qc/01a_fqc/fqc_trim/{smp}_R1_val_1_fastqc.html",
+        zip1="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/01_qc/01a_fqc/fqc_trim/{smp}_R1_val_1_fastqc.zip",
+        html2="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/01_qc/01a_fqc/fqc_trim/{smp}_R2_val_2_fastqc.html",
+        zip2="/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/01_qc/01a_fqc/fqc_trim/{smp}_R2_val_2_fastqc.zip"
     conda:
         "../envs/fastqc.yaml"
-    priority:3
     threads:20
+    params:
+        prefix = "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/01_qc/01a_fqc/fqc_trim/"
     shell:
         """
-        fastqc -t {threads} {input.r1} {input.r2} -q -f fastq -o results/01_qc/01a_fqc/fqc_trim/
+        fastqc -t {threads} {input.r1} {input.r2} -q -f fastq -o {params.prefix}
         """
 
 rule multiqc_trim:
     input:
-        expand("results/01_qc/01a_fqc/fqc_trim/{smp}_R1_val_1_fastqc.html", smp=sample_id),
-        expand("results/01_qc/01a_fqc/fqc_trim/{smp}_R2_val_2_fastqc.html", smp=sample_id)
+        expand(rules.fastqc_trim.output.html1, smp=sample_id),
+        expand(rules.fastqc_trim.output.html2, smp=sample_id)
     output:
-        "results/01b_multiqc/multiqc_trim/multiqc_report_trim_galore.html"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/01_qc/01b_multiqc/multiqc_trim/multiqc_report_trim_galore.html"
     log:
-        "results/01b_multiqc/multiqc_trim/logs/multiqc.log"
-    priority:2
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/01_qc/01b_multiqc/multiqc_trim/logs/multiqc.log"
     wrapper:
-        "0.31.1/bio/multiqc"
+        "0.49.0/bio/multiqc"
 
 rule trim_galore_multiqc:
     input:
-        expand("results/02_trim/{smp}_R1.fastq.gz_trimming_report.txt", smp=sample_id),
-        expand("results/02_trim/{smp}_R2.fastq.gz_trimming_report.txt", smp=sample_id)
+        expand(rules.trim_galore_pe.output.report1, smp=sample_id),
+        expand(rules.trim_galore_pe.output.report2, smp=sample_id)
     output:
-        "results/02_trim/trim_galore_multiqc_report.html"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/02_trim/trim_galore_multiqc_report.html"
     log:
-        "results/02_trim/logs/multiqc.log"
-    priority:1
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/02_trim/logs/multiqc.log"
     wrapper:
-        "0.31.1/bio/multiqc"
+        "0.49.0/bio/multiqc"

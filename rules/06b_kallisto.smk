@@ -2,10 +2,9 @@ rule kallisto_index:
     input:
         tcp= TRANSCRIPTS
     output:
-        "results/06_alignment_free/06b_kallisto/index/transcripts.idx"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/06_alignment_free/06b_kallisto/index/transcripts.idx"
     log:
-        "results/06_alignment_free/06b_kallisto/logs/index.log"
-    priority:3
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/06_alignment_free/06b_kallisto/logs/index.log"
     conda:
         "../envs/kallisto.yaml"
     threads:20
@@ -19,26 +18,24 @@ rule kallisto_quant:
         idx= rules.kallisto_index.output,
         gtf= rules.gff3_to_gtf.output.gtf
     output:
-        directory("results/06_alignment_free/06b_kallisto/quant/{smp}")
+        directory("/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/06_alignment_free/06b_kallisto/quant/{smp}")
     log:
-        "results/06_alignment_free/06b_kallisto/quant/{smp}.log"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/06_alignment_free/06b_kallisto/quant/{smp}.log"
     params:
         extra="--rf-stranded -b 100 --bias"
     conda:
         "../envs/kallisto.yaml"
     threads:20
-    priority:2
     shell:
         "kallisto quant --threads {threads} -i {input.idx} -o {output} --gtf {input.gtf} "
         "{params.extra} {input.r1} {input.r2} 2> {log}"
 
 rule multiqc_kallisto:
     input:
-        expand("results/06_alignment_free/06b_kallisto/quant/{smp}.log", smp=sample_id)
+        expand(rules.kallisto_quant.log, smp=sample_id)
     output:
-        "results/06_alignment_free/06b_kallisto/kallisto_multiqc.html"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/06_alignment_free/06b_kallisto/kallisto_multiqc.html"
     log:
-        "results/06_alignment_free/06b_kallisto/logs/multiqc.log"
-    priority:1
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/06_alignment_free/06b_kallisto/logs/multiqc.log"
     wrapper:
         "0.49.0/bio/multiqc"

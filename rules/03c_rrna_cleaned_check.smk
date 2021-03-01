@@ -6,9 +6,8 @@ rule bwa_mem_decontamination:
         r2=rules.bbmap.output.out2,
         rrna=config["rRNA"]
     output:
-        temp("results/03_decontamination/03c_rrna_cleaned_check/{smp}_clean_rrna.sam")
+        temp("/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03c_rrna_cleaned_check/{smp}_clean_rrna.sam")
     threads:16
-    priority:4
     conda:
         "../envs/bwa.yaml"
     shell:
@@ -20,9 +19,8 @@ rule sam_to_bam_decontamination:
     input:
         sam=rules.bwa_mem_decontamination.output
     output:
-        temp("results/03_decontamination/03c_rrna_cleaned_check/bam/{smp}_clean_rrna.bam")
+        temp("/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03c_rrna_cleaned_check/bam/{smp}_clean_rrna.bam")
     threads:16
-    priority:3
     conda:
         "../envs/samtools.yaml"
     shell:
@@ -34,24 +32,22 @@ rule stats_decontamination:
     input:
         bam=rules.sam_to_bam_decontamination.output
     output:
-        "results/03_decontamination/03c_rrna_cleaned_check/stats/{smp}_clean_rrna_stats.out"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03c_rrna_cleaned_check/stats/{smp}_clean_rrna_stats.out"
     threads:16
-    priority:2
     conda:
         "../envs/samtools.yaml"
     shell:
         '''
-        samtools stats -@ {threads} {input.bam} > {output}
+        samtools stats {input.bam} -@ {threads} > {output}
         '''
 
 rule multiqc_rrna_decontamination:
     input:
-        expand("results/03_decontamination/03c_rrna_cleaned_check/bam/{smp}_clean_rrna.bam", smp=sample_id),
-        expand("results/03_decontamination/03c_rrna_cleaned_check/stats/{smp}_clean_rrna_stats.out", smp=sample_id)
+        expand(rules.sam_to_bam_decontamination.output, smp=sample_id),
+        expand(rules.stats_decontamination.output, smp=sample_id)
     output:
-        "results/03_decontamination/03c_rrna_cleaned_check/rrna_clean_multiqc_report.html"
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03c_rrna_cleaned_check/rrna_clean_multiqc_report.html"
     log:
-        "results/03_decontamination/03c_rrna_cleaned_check/logs/multiqc.log"
-    priority:1
+        "/scratch/ac32082/02.PeanutRNASeq/01.analysis/peanut_rna_seq_analysis/results/03_decontamination/03c_rrna_cleaned_check/logs/multiqc.log"
     wrapper:
         "0.48.0/bio/multiqc"
