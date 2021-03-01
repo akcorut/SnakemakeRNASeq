@@ -9,7 +9,7 @@ A Snakemake workflow to process paired-end RNA-Seq data.
 - Adapter trimming w/ trim_galore (Optional)
 - Contamination check and decontamination (Optional)
 - Alignment to the reference genome (hisat2, STAR)
-- Quality control with RSeQC, QualiMap
+- Alignment quality control with RSeQC, QualiMap
 - Transcript/gene quantification (StringTie, featureCounts, RSEM)
 - Alignment-free transcript quantification (kallisto/salmon)
 
@@ -17,7 +17,7 @@ A Snakemake workflow to process paired-end RNA-Seq data.
 - Differential gene expression analysis (deseq2)
 - Machine learning-based mapping uncertainty analysis (GeneQC)
 
-![dag](https://user-images.githubusercontent.com/42179487/74106710-ec1f1a80-4b36-11ea-94b2-d52f4bee5574.png)
+![dag](https://user-images.githubusercontent.com/42179487/109564224-c13f9580-7aae-11eb-9bd6-60f1adb65c60.png)
 
 
 
